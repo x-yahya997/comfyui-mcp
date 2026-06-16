@@ -36,6 +36,13 @@ All notable changes to this project are documented here. This project adheres to
   `resolveCheckpoint` auto-select fallback was removed. Set a default via
   `set_defaults({ checkpoint: "..." })` to bypass the prompt.
 
+- **`generate_image` auto-downloads results to workspace.** After enqueuing,
+  the tool now polls for completion (up to 120s, configurable via
+  `COMFYUI_GENERATE_WAIT_S`) and automatically saves output images to
+  `./outputs/` (configurable via `save_dir` param). Returns saved file paths
+  and inline image data on completion. Set `wait: false` to revert to the
+  old fire-and-forget behavior. Works in local, remote, and cloud mode.
+
 ### Fixed
 
 - **Warn when COMFYUI_URL and COMFYUI_PATH conflict.** Config now prints a
