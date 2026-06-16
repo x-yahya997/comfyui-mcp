@@ -18,7 +18,6 @@ import { registerAssetTools } from "./assets.js";
 import { registerAutoloadedWorkflows } from "./workflow-autoload.js";
 import { registerDefaultsTools } from "./defaults.js";
 import { registerGenerateImageTool } from "./generate-image.js";
-import { registerGenerateAudioTool } from "./generate-audio.js";
 import { registerConditionedGenerationTools } from "./generate-conditioned.js";
 import { registerWorkflowDslTools } from "./workflow-dsl.js";
 import { registerNodeSnapshotsTools } from "./node-snapshots.js";
@@ -60,7 +59,6 @@ export async function registerAllTools(server: McpServer): Promise<void> {
   registerAssetTools(server);
   registerDefaultsTools(server);
   registerGenerateImageTool(server);
-  registerGenerateAudioTool(server);
   registerConditionedGenerationTools(server);
   registerWorkflowDslTools(server);
   registerNodeSnapshotsTools(server);
