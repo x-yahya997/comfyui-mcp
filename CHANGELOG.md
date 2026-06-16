@@ -29,6 +29,13 @@ All notable changes to this project are documented here. This project adheres to
   `start_comfyui`, `stop_comfyui`, and `restart_comfyui` now throw a clear error
   when `--comfyui-url` points at a remote (non-loopback) host.
 
+- **`generate_image` enforces model selection — no silent auto-pick.** When
+  `checkpoint` is omitted, the tool now scans `checkpoints/` and
+  `diffusion_models/`, lists available models, and asks the user to choose —
+  instead of silently picking the first file alphabetically. The old
+  `resolveCheckpoint` auto-select fallback was removed. Set a default via
+  `set_defaults({ checkpoint: "..." })` to bypass the prompt.
+
 ### Fixed
 
 - **Warn when COMFYUI_URL and COMFYUI_PATH conflict.** Config now prints a

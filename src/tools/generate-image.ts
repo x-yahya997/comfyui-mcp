@@ -3,24 +3,17 @@ import type { McpServer } from "@modelcontextprotocol/sdk/server/mcp.js";
 import { generateImage } from "../services/generate-image.js";
 import { enqueueWorkflow } from "../services/workflow-executor.js";
 import { listLocalModels } from "../services/model-resolver.js";
+import { DefaultsManager } from "../services/defaults-manager.js";
 import { errorToToolResult } from "../utils/errors.js";
-
-async function resolveCheckpoint(): Promise<string | undefined> {
-  try {
-    const models = await listLocalModels("checkpoints");
-    return models[0]?.name;
-  } catch {
-    return undefined;
-  }
-}
 
 export function registerGenerateImageTool(server: McpServer): void {
   server.tool(
     "generate_image",
     "Generate an image from a text prompt — the high-level entry point. Builds a txt2img workflow, " +
-      "filling any unspecified parameter from your configured defaults (set_defaults / COMFYUI_DEFAULT_* / config file), " +
-      "auto-selecting a local checkpoint when none is given. Returns the prompt_id immediately; the resulting " +
-      "asset_id arrives in the completion notification and can be passed to view_image or regenerate. " +
+      "filling any unspecified parameter from your configured defaults (set_defaults / COMFYUI_DEFAULT_* / config file). " +
+      "REQUIRED: You MUST specify a `checkpoint` filename. If omitted, this tool will NOT auto-select one — " +
+      "it returns the list of available models and asks you to choose. " +
+      "Use list_local_models first to see what is installed, then pass the chosen filename as checkpoint. " +
       "For full control over the node graph, use create_workflow + enqueue_workflow instead.",
     {
       prompt: z.string().describe("Positive text prompt"),
@@ -35,13 +28,50 @@ export function registerGenerateImageTool(server: McpServer): void {
       checkpoint: z
         .string()
         .optional()
-        .describe("Checkpoint filename; auto-selected from local models if omitted"),
+        .describe("Checkpoint filename (required — use list_local_models to see available options, then pass the chosen filename here)"),
       batch_size: z.number().int().positive().optional().describe("Number of images to generate"),
     },
     async (args) => {
+      // If no checkpoint is given and no default is configured, list available
+      // models and ask the user to pick one — never auto-select blindly.
+      if (!args.checkpoint && !DefaultsManager.get("checkpoint")) {
+        const [checkpoints, diffModels] = await Promise.all([
+          listLocalModels("checkpoints").catch(() => []),
+          listLocalModels("diffusion_models").catch(() => []),
+        ]);
+
+        if (checkpoints.length === 0 && diffModels.length === 0) {
+          return {
+            content: [{
+              type: "text",
+              text: "No models found. Use `download_model` or `search_models` to install one first, "
+                + "or set a default checkpoint via `set_defaults({ checkpoint: \"...\" })`.",
+            }],
+          };
+        }
+
+        const parts: string[] = [];
+        if (checkpoints.length > 0) {
+          parts.push("**Checkpoints:**\n" + checkpoints.map(m => `- \`${m.name}\``).join("\n"));
+        }
+        if (diffModels.length > 0) {
+          parts.push("**Diffusion models:**\n" + diffModels.map(m => `- \`${m.name}\``).join("\n"));
+        }
+
+        return {
+          content: [{
+            type: "text",
+            text: "No checkpoint was specified. I found these models available — which one should I use?\n\n"
+              + parts.join("\n\n")
+              + "\n\nCall `generate_image` again with the `checkpoint` parameter set to your choice, "
+              + "or set a default via `set_defaults({ checkpoint: \"...\" })`.",
+          }],
+        };
+      }
+
       try {
         const result = await generateImage(args, {
-          resolveCheckpoint,
+          resolveCheckpoint: async () => undefined,
           enqueue: (workflow) => enqueueWorkflow(workflow),
         });
         return {
