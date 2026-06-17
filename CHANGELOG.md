@@ -8,6 +8,14 @@ All notable changes to this project are documented here. This project adheres to
 
 ### Added
 
+- **Agent skills for image generation.** New `SKILL.md` and `.opencode/skills/` with a comprehensive agent guide covering MCP tool reference, generation protocol (plan-first, todo checklist, file verification), pipeline architecture, workflow templates, sampler settings, and prompt planning. Agent is instructed to never use CLI — only MCP tools.
+
+- **opencode.json config.** Self-contained opencode configuration registering comfyui-mcp as an MCP server (`node dist/index.js --comfyui-url`) and loading image generation skills from `.opencode/skills/`. Portable — copy `opencode.json` + `.opencode/` to any workspace.
+
+- **Workflow Remix skill (`REMIX.md`).** Behavioral guide teaching agents to search existing workflows via `list_workflows` + `analyze_workflow` and adapt with `modify_workflow` rather than building from scratch by default. Only use `create_workflow` when explicitly told to Create.
+
+- **Code-level agent friction audit (`.plan/`).** Comprehensive analysis of all 50+ MCP tools identifying 15 issues ranked by severity — silent seed randomization, auto-select models, opaque template defaults, inconsistent checkpoint handling, and unstructured text returns. Phased remediation plan included.
+
 - **Plugin bundles the Civitai MCP — headless pairing.** `plugin/.mcp.json`
   now declares the official [Civitai MCP](https://mcp.civitai.com/mcp) remote
   server (streamable HTTP) alongside comfyui, so `/plugin install comfy`

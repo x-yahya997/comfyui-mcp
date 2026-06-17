@@ -1,0 +1,13 @@
+{
+  "$schema": "https://opencode.ai/config.json",
+  "mcp": {
+    "comfyui-mcp": {
+      "type": "local",
+      "command": ["node", "D:/GitHub/comfyui-mcp/dist/index.js", "--comfyui-url", "http://10.0.0.2:8188"],
+      "enabled": true
+    }
+  },
+  "skills": {
+    "paths": [".opencode/skills"]
+  }
+}

@@ -1,0 +1,6 @@
+1. When skils is set to create workflow. is preventing agent reading the existing in the json workflow good idea ?.
+2. Enforce the agent to create 2 md file. 
+a. workflow inside comfyui json file. minimal prompt sample
+b. literally how prompt look likes,this part where usually agent get lost.
+ the are creating simple prompt.so this md file should not contains how worfklow works. 
+and fully prompt planning only. minimal info about image generation model name
